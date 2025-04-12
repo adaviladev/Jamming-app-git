@@ -1,11 +1,13 @@
 import React from 'react';
 import styles from './Track.module.css';
 
-function Track() {
+function Track({name, artist, album, onAdd}) {
     return (
         <div className={styles.Track}>
-            <p>Track Name - Artist Name</p>
-            <button>+</button>
+            <p>
+                <strong>{name}</strong> by {artist} ({album})
+            </p>
+            <button onClick={onAdd}>+</button>
         </div>
     );
 }
