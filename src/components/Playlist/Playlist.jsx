@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './Playlist.module.css';
 import Track from '../Track/Track';
 
-function Playlist({ playlistTracks }) {
+function Playlist({ playlistTracks, onRemove }) {
     return (
         <div className={styles.Playlist}>
             <h2>Playlist</h2>
@@ -13,6 +13,8 @@ function Playlist({ playlistTracks }) {
                         name={track.name}
                         artist={track.artist}
                         album={track.album}
+                        onRemove={() => onRemove(track)}
+                        isRemoval={true} // Indicate that this is for removal     
                     />
                 ))}
             </div>

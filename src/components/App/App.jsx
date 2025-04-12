@@ -23,15 +23,17 @@ function App() {
     }
   };
 
+  const removeTrack = (track) => {
+    setPlaylistTracks(playlistTracks.filter((savedTrack) => savedTrack.id !== track.id));
+  };
+
   return (
     <div className="App">
       <h1>Jammming</h1>
       <p>Discover and create playlists</p>
       <SearchBar />
       <SearchResults searchResults={searchResults} onAdd={addTrack} />
-      <Playlist playlistTracks={playlistTracks}/>
-      {/* <Tracklist /> */}
-      {/* <Track /> */}
+      <Playlist playlistTracks={playlistTracks} onRemove={removeTrack} />
     </div>
   );
 }
