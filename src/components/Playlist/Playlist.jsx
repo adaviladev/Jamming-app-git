@@ -2,10 +2,19 @@ import React from 'react';
 import styles from './Playlist.module.css';
 import Track from '../Track/Track';
 
-function Playlist({ playlistTracks, onRemove }) {
+function Playlist({ playlistTracks, playlistName, onRemove, onNameChange, onSave }) {
+    const handleNameChange = (event) => {
+        onNameChange(event.target.value);
+    }
+    
     return (
         <div className={styles.Playlist}>
-            <h2>Playlist</h2>
+            <input 
+                type="text"
+                value={playlistName}
+                onChange={handleNameChange}
+                placeholder='New Playlist Name'
+            />
             <div>
                 {playlistTracks.map((track) => (
                     <Track
@@ -18,8 +27,7 @@ function Playlist({ playlistTracks, onRemove }) {
                     />
                 ))}
             </div>
-            <input type="text" placeholder="New Playlist Name" />
-            <button>SAVE TO SPOTIFY</button>
+            <button onClick={onSave}>SAVE TO SPOTIFY</button>
         </div>
     )
 }

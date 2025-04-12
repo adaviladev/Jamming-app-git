@@ -15,6 +15,7 @@ function App() {
 
   // State for the playlist
   const [playlistTracks, setPlaylistTracks] = useState([]);
+  const [playlistName, setPlaylistName] = useState('New Playlist');
 
   // Function to add a track to the playlist
   const addTrack = (track) => {
@@ -27,13 +28,30 @@ function App() {
     setPlaylistTracks(playlistTracks.filter((savedTrack) => savedTrack.id !== track.id));
   };
 
+  const updatePlaylistName = (name) => {
+    setPlaylistName(name);
+  }
+
+  const savePlaylist = () => {
+    const trackURIs = playlistTracks.map((track) => track.id);
+    console.log(`Saving playlist: ${playlistName}`);
+    console.log('Track URIs:', trackURIs);
+    // Here you would typically call an API to save the playlist to Spotify
+  }
+
   return (
     <div className="App">
       <h1>Jammming</h1>
       <p>Discover and create playlists</p>
       <SearchBar />
       <SearchResults searchResults={searchResults} onAdd={addTrack} />
-      <Playlist playlistTracks={playlistTracks} onRemove={removeTrack} />
+      <Playlist 
+        playlistTracks={playlistTracks}
+        playlistName={playlistName}
+        onRemove={removeTrack}
+        onNameChange={updatePlaylistName}
+        onSave={savePlaylist}
+      />
     </div>
   );
 }
