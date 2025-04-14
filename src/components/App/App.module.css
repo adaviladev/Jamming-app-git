@@ -1,4 +1,6 @@
 .App {
     text-align: center;
     font-family: Arial, sans-serif;
+    max-width: 70%;
+    margin: auto;
 }

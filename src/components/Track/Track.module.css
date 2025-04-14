@@ -4,12 +4,17 @@
     align-items: center;
     padding: 10px;
     border-bottom: 1px solid #ccc;
+    flex-wrap: wrap; /* Permite que los elementos se ajusten a la siguiente línea */
 }
 
 .Track p {
     margin: 0;
     font-size: 16px;
     color: #333;
+    word-wrap: break-word; /* Ajusta las palabras largas */
+    overflow-wrap: break-word; /* Asegura que las palabras largas se dividan */
+    max-width: 80%; /* Limita el ancho máximo del texto */
+    flex: 1; /* Permite que el texto ocupe el espacio disponible */
 }
 
 .Track button {
@@ -20,8 +25,30 @@
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    flex-shrink: 0; /* Evita que el botón se reduzca */
+    width: 40px; /* Ancho fijo */
+    height: 40px; /* Altura fija */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
 }
 
 .Track button:hover {
     background-color: #004d40;
+}
+
+@media (max-width: 768px) {
+    .Track p {
+        max-width: 70%; /* Reduce el ancho máximo en pantallas pequeñas */
+    }
+
+    .Track {
+        flex-direction: column; /* Cambia la dirección a columna en pantallas pequeñas */
+        align-items: flex-start;
+    }
+
+    .Track button {
+        margin-top: 10px; /* Agrega espacio entre el texto y el botón */
+    }
 }
