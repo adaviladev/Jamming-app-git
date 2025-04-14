@@ -3,6 +3,7 @@ import './App.module.css';
 import SearchBar from '../SearchBar/SearchBar';
 import SearchResults from '../SearchResults/SearchResults';
 import Playlist from '../Playlist/Playlist';
+import Spotify from '../../util/Spotify';
 
 function App() {
   // Mock data for search results
@@ -33,17 +34,24 @@ function App() {
   }
 
   const savePlaylist = () => {
-    const trackURIs = playlistTracks.map((track) => track.id);
-    console.log(`Saving playlist: ${playlistName}`);
-    console.log('Track URIs:', trackURIs);
-    // Here you would typically call an API to save the playlist to Spotify
-  }
+    const trackURIs = playlistTracks.map((track) => `spotify:track:${track.id}`);
+    Spotify.savePlaylist(playlistName, trackURIs).then(() => {
+      setPlaylistName('New Playlist');
+      setPlaylistTracks([]);
+    });
+  };
+
+  const searchSpotify = (term) => {
+    Spotify.search(term).then((results) => {
+      setSearchResults(results);
+    });
+  };
 
   return (
     <div className="App">
       <h1>Jammming</h1>
       <p>Discover and create playlists</p>
-      <SearchBar />
+      <SearchBar onSearch={searchSpotify} />
       <SearchResults searchResults={searchResults} onAdd={addTrack} />
       <Playlist 
         playlistTracks={playlistTracks}
