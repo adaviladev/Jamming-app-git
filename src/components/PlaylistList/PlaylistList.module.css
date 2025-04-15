@@ -1,0 +1,32 @@
+.PlaylistList {
+  margin: 20px 0;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.PlaylistList h2 {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.PlaylistList ul {
+  list-style: none;
+  padding: 0;
+}
+
+.PlaylistList li {
+  padding: 10px;
+  margin: 5px 0;
+  background-color: #00796b;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.PlaylistList li:hover {
+  background-color: #004d40;
+}
