@@ -3,25 +3,18 @@ import './App.module.css';
 import SearchBar from '../SearchBar/SearchBar';
 import SearchResults from '../SearchResults/SearchResults';
 import Playlist from '../Playlist/Playlist';
+import PlaylistList from '../PlaylistList/PlaylistList';
 import Spotify from '../../util/Spotify';
 
 function App() {
-  // Mock data for search results
-  // In a real application, this would be fetched from an API
-  const [searchResults, setSearchResults] = useState([
-    { id: 1, name: 'Song 1', artist: 'Artist 1', album: 'Album 1' },
-    { id: 2, name: 'Song 2', artist: 'Artist 2', album: 'Album 2' },
-    { id: 3, name: 'Song 3', artist: 'Artist 3', album: 'Album 3' },
-  ]);
-
-  // State for the playlist
+  const [searchResults, setSearchResults] = useState([]);
+  const [playlistId, setPlaylistId] = useState(null);
+  const [playlistName, setPlaylistName] = useState('');
   const [playlistTracks, setPlaylistTracks] = useState([]);
-  const [playlistName, setPlaylistName] = useState('New Playlist');
 
-  // Function to add a track to the playlist
   const addTrack = (track) => {
     if (!playlistTracks.find((savedTrack) => savedTrack.id === track.id)) {
-      setPlaylistTracks([...playlistTracks, track])
+      setPlaylistTracks([...playlistTracks, track]);
     }
   };
 
@@ -29,15 +22,15 @@ function App() {
     setPlaylistTracks(playlistTracks.filter((savedTrack) => savedTrack.id !== track.id));
   };
 
-  const updatePlaylistName = (name) => {
-    setPlaylistName(name);
-  }
-
   const savePlaylist = () => {
     const trackURIs = playlistTracks.map((track) => `spotify:track:${track.id}`);
-    Spotify.savePlaylist(playlistName, trackURIs).then(() => {
+    console.log('Saving Playlist ID:', playlistId);
+    console.log('Saving Playlist Name:', playlistName);
+    console.log('Saving Tracks:', trackURIs);
+    Spotify.savePlaylist(playlistName, trackURIs, playlistId).then(() => {
       setPlaylistName('New Playlist');
       setPlaylistTracks([]);
+      setPlaylistId(null); // Restablece el ID de la lista de reproducción
     });
   };
 
@@ -47,17 +40,29 @@ function App() {
     });
   };
 
+  const selectPlaylist = (id) => {
+    Spotify.getPlaylist(id).then((playlist) => {
+      console.log('Selected Playlist ID:', id);
+      console.log('Selected Playlist Name:', playlist.name);
+      console.log('Selected Playlist Tracks:', playlist.tracks);
+      setPlaylistId(id);
+      setPlaylistName(playlist.name);
+      setPlaylistTracks(playlist.tracks);
+    });
+  };
+
   return (
     <div className="App">
       <h1>Jammming</h1>
-      <p>Discover and create playlists</p>
+      <PlaylistList onSelectPlaylist={selectPlaylist} />
       <SearchBar onSearch={searchSpotify} />
       <SearchResults searchResults={searchResults} onAdd={addTrack} />
-      <Playlist 
-        playlistTracks={playlistTracks}
+      <Playlist
+        playlistId={playlistId}
         playlistName={playlistName}
+        playlistTracks={playlistTracks}
         onRemove={removeTrack}
-        onNameChange={updatePlaylistName}
+        onNameChange={setPlaylistName}
         onSave={savePlaylist}
       />
     </div>

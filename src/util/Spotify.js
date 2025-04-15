@@ -1,6 +1,7 @@
 const clientId = '15e59b0df1884318a1388cc09b086097'; // Reemplaza con tu Client ID
 const redirectUri = 'http://127.0.0.1:3000'; // Reemplaza con tu Redirect URI
 let accessToken;
+let userId; // Variable para almacenar el ID del usuario
 
 const Spotify = {
   // Generar un code_verifier aleatorio
@@ -111,21 +112,46 @@ const Spotify = {
   },
 
   // Guardar una lista de reproducción en Spotify
-  async savePlaylist(name, trackURIs) {
-    if (!name || !trackURIs.length) {
-      return;
+  async savePlaylist(name, trackURIs, id = null) {
+    const accessToken = await this.getAccessToken();
+    const headers = { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' };
+
+    const userId = await this.getCurrentUserId();
+
+    if (id) {
+      // Actualizar una lista de reproducción existente
+      await fetch(`https://api.spotify.com/v1/users/${userId}/playlists/${id}`, {
+        headers: headers,
+        method: 'PUT',
+        body: JSON.stringify({ name: name }),
+      });
+
+      return fetch(`https://api.spotify.com/v1/playlists/${id}/tracks`, {
+        headers: headers,
+        method: 'PUT',
+        body: JSON.stringify({ uris: trackURIs }),
+      });
+    } else {
+      // Crear una nueva lista de reproducción
+      return fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
+        headers: headers,
+        method: 'POST',
+        body: JSON.stringify({ name: name, public: true }),
+      }).then((response) => response.json());
+    }
+  },
+
+  // Obtener el ID del usuario actual
+  async getCurrentUserId() {
+    if (userId) {
+      return Promise.resolve(userId);
     }
 
     const accessToken = await this.getAccessToken();
-    const headers = { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' };
-    let userId;
+    const headers = { Authorization: `Bearer ${accessToken}` };
 
-    console.log('Authorization Header:', headers);
-
-    // Obtener el ID del usuario
     return fetch('https://api.spotify.com/v1/me', { headers: headers })
       .then((response) => {
-        console.log('Response Status:', response.status);
         if (!response.ok) {
           throw new Error('Failed to fetch user ID');
         }
@@ -133,49 +159,56 @@ const Spotify = {
       })
       .then((jsonResponse) => {
         userId = jsonResponse.id;
+        return userId;
+      });
+  },
 
-        // Crear una nueva lista de reproducción
-        return fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
-          headers: headers,
-          method: 'POST',
-          body: JSON.stringify({
-            name: name,
-            public: true,
-            description: 'Created with Jammming app',
-          }),
-        });
-      })
+  // Obtener las listas de reproducción del usuario
+  async getUserPlaylists() {
+    const accessToken = await this.getAccessToken();
+    const headers = { Authorization: `Bearer ${accessToken}` };
+
+    const userId = await this.getCurrentUserId();
+    return fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, { headers: headers })
       .then((response) => {
-        console.log('Response Status:', response.status);
         if (!response.ok) {
-          throw new Error('Failed to create playlist');
+          throw new Error('Failed to fetch playlists');
         }
         return response.json();
       })
       .then((jsonResponse) => {
-        const playlistId = jsonResponse.id;
-
-        // Agregar canciones a la lista de reproducción
-        return fetch(
-          `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
-          {
-            headers: headers,
-            method: 'POST',
-            body: JSON.stringify({ uris: trackURIs }),
-          }
-        );
-      })
-      .then((response) => {
-        console.log('Response Status:', response.status);
-        if (!response.ok) {
-          throw new Error('Failed to add tracks to playlist');
-        }
-        return response.json();
-      })
-      .catch((error) => {
-        console.error('Error:', error);
+        return jsonResponse.items.map((playlist) => ({
+          id: playlist.id,
+          name: playlist.name,
+        }));
       });
   },
+};
+
+// Obtener una lista de reproducción por ID
+Spotify.getPlaylist = async function (id) {
+  const accessToken = await this.getAccessToken();
+  const headers = { Authorization: `Bearer ${accessToken}` };
+
+  return fetch(`https://api.spotify.com/v1/playlists/${id}`, { headers: headers })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('Failed to fetch playlist');
+      }
+      return response.json();
+    })
+    .then((jsonResponse) => {
+      return {
+        name: jsonResponse.name,
+        tracks: jsonResponse.tracks.items.map((item) => ({
+          id: item.track.id,
+          name: item.track.name,
+          artist: item.track.artists[0].name,
+          album: item.track.album.name,
+          uri: item.track.uri,
+        })),
+      };
+    });
 };
 
 export default Spotify;
