@@ -24,9 +24,6 @@ function App() {
 
   const savePlaylist = () => {
     const trackURIs = playlistTracks.map((track) => `spotify:track:${track.id}`);
-    console.log('Saving Playlist ID:', playlistId);
-    console.log('Saving Playlist Name:', playlistName);
-    console.log('Saving Tracks:', trackURIs);
     Spotify.savePlaylist(playlistName, trackURIs, playlistId).then(() => {
       setPlaylistName('New Playlist');
       setPlaylistTracks([]);
@@ -42,21 +39,32 @@ function App() {
 
   const selectPlaylist = (id) => {
     Spotify.getPlaylist(id).then((playlist) => {
-      console.log('Selected Playlist ID:', id);
-      console.log('Selected Playlist Name:', playlist.name);
-      console.log('Selected Playlist Tracks:', playlist.tracks);
       setPlaylistId(id);
       setPlaylistName(playlist.name);
       setPlaylistTracks(playlist.tracks);
     });
   };
 
+  const createNewPlaylist = () => {
+    setPlaylistId(null);
+    setPlaylistName('New Playlist');
+    setPlaylistTracks([]);
+  };
+
+  const goToHome = () => {
+    window.location.href = '/';
+  };
+
   return (
     <div className="App">
-      <h1>Jammming</h1>
-      <PlaylistList onSelectPlaylist={selectPlaylist} />
+      <button onClick={goToHome} className="HomeButton">
+        <h1>Jammming</h1>
+      </button>
       <SearchBar onSearch={searchSpotify} />
-      <SearchResults searchResults={searchResults} onAdd={addTrack} />
+      <PlaylistList onSelectPlaylist={selectPlaylist} />
+      {searchResults.length > 0 && (
+        <SearchResults searchResults={searchResults} onAdd={addTrack} />
+      )}
       <Playlist
         playlistId={playlistId}
         playlistName={playlistName}
@@ -65,6 +73,7 @@ function App() {
         onNameChange={setPlaylistName}
         onSave={savePlaylist}
       />
+      <button onClick={createNewPlaylist}>Create New Playlist</button>
     </div>
   );
 }
